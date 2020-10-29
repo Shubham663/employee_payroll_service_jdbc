@@ -63,6 +63,56 @@ public class EmployeeDatabaseTest
     }
     
     /**
+     * Gets no of male employees
+     */
+    @Test
+    public void groupFunctionCount() throws JDBCException
+    {
+    	int value = payDataService.groupFunctionCount(connection);
+    	assertEquals(3, value,0);
+    }
+    
+    /**
+     * Gets sum of salary of male employees
+     */
+    @Test
+    public void groupFunctionSum() throws JDBCException
+    {
+    	double value = payDataService.groupFunctionSum(connection);
+    	assertEquals(160000, value,0);
+    }
+    
+    /**
+     * Gets minimum of salary of male employees
+     */
+    @Test
+    public void groupFunctionMin() throws JDBCException
+    {
+    	double value = payDataService.groupFunctionMin(connection);
+    	assertEquals(45000, value,0);
+    }
+    
+    /**
+     * Gets maximum of salary of male employees
+     */
+    @Test
+    public void groupFunctionMax() throws JDBCException
+    {
+    	double value = payDataService.groupFunctionMax(connection);
+    	assertEquals(65000, value,0);
+    }
+    
+    /**
+     * Gets average of salary of Female employees
+     */
+    @Test
+    public void groupFunctionAvg() throws JDBCException
+    {
+    	double value = payDataService.groupFunctionAvg(connection);
+    	assertEquals(1300000, value,0);
+    }
+    
+    /**
      * Check for data changes inside database
      * @throws JDBCException 
      */
