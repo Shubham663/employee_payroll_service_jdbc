@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import java.sql.Connection;
+import java.sql.Date;
 import java.sql.SQLException;
 import java.util.List;
 
@@ -46,6 +47,19 @@ public class EmployeeDatabaseTest
 				salary = employee.getSalary();
 		}
         assertEquals(4000000, salary,0);
+    }
+    
+    /**
+     * Employees joining in particular date range are returned
+     * @throws JDBCException 
+     */
+    @Test
+    public void getEmployeesJoininigInParticularRange() throws JDBCException
+    {
+    	Date date = Date.valueOf("2020-01-02");
+    	Date date2 = Date.valueOf("2020-11-31");
+    	List<Employees> list = payDataService.getDateRange(connection,date,date2);
+    	assertEquals(5, list.size());
     }
     
     /**

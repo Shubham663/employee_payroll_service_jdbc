@@ -1,6 +1,7 @@
 package com.bridgelabz.employee_payroll_service_jdbc;
 
 import java.sql.Connection;
+import java.sql.Date;
 import java.sql.Driver;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -78,7 +79,7 @@ public class PayrollDatabaseService {
 		Statement stmt = null;
 		ResultSet result = null;
 		List<Employees> listEmployees = null;
-		try{
+		try {
 			stmt = connection.createStatement();
 			result = stmt.executeQuery("select * from employees");
 			listEmployees = new ArrayList<>();
@@ -99,16 +100,17 @@ public class PayrollDatabaseService {
 				listEmployees.add(employee);
 			}
 			logger.info("List successfully retrieved from database");
-		}catch(SQLException exception) {
+		} catch (SQLException exception) {
 			throw new JDBCException("Error while retrieving data");
-		}finally {
+		} finally {
 			try {
-				if(result != null)
+				if (result != null)
 					result.close();
-				if(stmt != null)
+				if (stmt != null)
 					stmt.close();
 			} catch (SQLException e) {
-				throw new JDBCException("Error while closing resources when retrieving data" + connection + e.getMessage());
+				throw new JDBCException(
+						"Error while closing resources when retrieving data" + connection + e.getMessage());
 			}
 		}
 		return listEmployees;
@@ -119,27 +121,65 @@ public class PayrollDatabaseService {
 		try {
 			stmt = connection.createStatement();
 			stmt.execute("Update employees set salary = 3000000 where name = \"Terisa\"");
-		}catch(SQLException exception) {
+		} catch (SQLException exception) {
 			throw new JDBCException("Error while updating salary");
-		}finally{
+		} finally {
 			try {
 				stmt.close();
-			}catch(SQLException exception) {
-				throw new JDBCException("Error while closing resources when updating database " + connection + exception.getMessage());
+			} catch (SQLException exception) {
+				throw new JDBCException(
+						"Error while closing resources when updating database " + connection + exception.getMessage());
 			}
 		}
 	}
 
 	public void updateDetailsPrepared(Connection connection) throws JDBCException {
 		try {
-			preparedStatement = connection
-					.prepareStatement("Update employees set salary = ? where name = ?");
+			preparedStatement = connection.prepareStatement("Update employees set salary = ? where name = ?");
 			preparedStatement.setDouble(1, 4000000);
 			preparedStatement.setString(2, "Terisa");
 			preparedStatement.execute();
 			preparedStatement.close();
-		}catch(SQLException exception) {
+		} catch (SQLException exception) {
 			throw new JDBCException("Error while updating with prepared Statement ");
 		}
+	}
+
+	public List<Employees> getDateRange(Connection connection, Date date1, Date date2) throws JDBCException {
+
+		List<Employees> listEmployees = null;
+		try {
+			preparedStatement = connection.prepareStatement(
+					"Select * from employees where start_date between cast(? as date) and cast(? as date)");
+			preparedStatement.setDate(1, date1);
+			preparedStatement.setDate(2, date2);
+			ResultSet result = preparedStatement.executeQuery();
+			listEmployees = new ArrayList<>();
+			try {
+				while (result.next()) {
+					SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-mm-dd");
+					Employees employee = new Employees();
+					employee.setEmployeeID(result.getInt(1));
+					employee.setName(result.getString(2));
+					employee.setSalary(result.getDouble(3));
+					employee.setStart_date(result.getDate(4));
+					employee.setGender(result.getString(5));
+					employee.setBasicPay(result.getDouble(6));
+					employee.setDeductions(result.getDouble(7));
+					employee.setTaxablePay(result.getDouble(8));
+					employee.setIncomeTax(result.getDouble(9));
+					employee.setNetPay(result.getDouble(10));
+					employee.setPhoneNumber(result.getLong(11));
+					listEmployees.add(employee);
+				}
+				logger.info("List successfully retrieved from database");
+			} catch (SQLException exception) {
+				throw new JDBCException("Error while retrieving data");
+			}
+			preparedStatement.close();
+		} catch (SQLException exception) {
+			throw new JDBCException("Error while updating with prepared Statement ");
+		}
+		return listEmployees;
 	}
 }
