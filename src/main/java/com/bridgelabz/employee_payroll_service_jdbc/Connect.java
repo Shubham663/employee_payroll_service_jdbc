@@ -16,7 +16,7 @@ import com.bridgelabz.repos.Repos;
 
 public class Connect 
 {
-    public static void main( String[] args ) throws SQLException{
+    public static void main( String[] args ){
     	Connection connection = null;
     	
     	try {
@@ -41,7 +41,19 @@ public class Connect
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-    	
+    	try {
+    	updateDetails(connection);
+    	List<Employees> list = getListFromDatabase(connection);
+    	double salary = 0;
+    	for(Employees employee : list) {
+    		if(employee.getName().equals("Terisa"))
+    			salary = employee.getSalary();
+    	}
+    	if(salary == 3000000)
+    		System.out.println("Local list updated successfully");
+    	}catch(SQLException exception) {
+    		System.out.println("Ran into error while updating list");
+    	}
     	if(connection != null)
 			try {
 				connection.close();
@@ -51,7 +63,13 @@ public class Connect
 			}
     }
     
-    private static List<Employees> getListFromDatabase(Connection connection) throws SQLException {
+    private static void updateDetails(Connection connection) throws SQLException {
+    	Statement stmt = connection.createStatement();
+    	stmt.execute("Update employees set salary = 3000000 where name = \"Terisa\"");
+    	stmt.close();
+	}
+
+	private static List<Employees> getListFromDatabase(Connection connection) throws SQLException {
     	Statement stmt = connection.createStatement();
 		ResultSet result = stmt.executeQuery("select * from employees");
 		List<Employees> listEmployees = new ArrayList<>();
