@@ -178,8 +178,88 @@ public class PayrollDatabaseService {
 			}
 			preparedStatement.close();
 		} catch (SQLException exception) {
-			throw new JDBCException("Error while updating with prepared Statement ");
+			throw new JDBCException("Error while getting recods with prepared Statement ");
 		}
 		return listEmployees;
+	}
+
+	public int groupFunctionCount(Connection connection) throws JDBCException {
+		int count = 0;
+		try {
+			preparedStatement = connection.prepareStatement("select count(gender) from employees where gender = \"Male\"");
+			ResultSet result = preparedStatement.executeQuery();
+			while(result.next()) {
+				count = result.getInt(1);
+				break;
+			}
+			preparedStatement.close();
+		} catch (SQLException exception) {
+			throw new JDBCException("Error while running group statements with prepared Statement ");
+		}
+		return count;
+	}
+
+	public double groupFunctionSum(Connection connection) throws JDBCException {
+		double salarySum = 0;
+		try {
+			preparedStatement = connection.prepareStatement("select sum(salary) from employees where gender = \"Male\"");
+			ResultSet result = preparedStatement.executeQuery();
+			while(result.next()) {
+				salarySum = result.getInt(1);
+				break;
+			}
+			preparedStatement.close();
+		} catch (SQLException exception) {
+			throw new JDBCException("Error while running group statements with prepared Statement ");
+		}
+		return salarySum;
+	}
+
+	public double groupFunctionMin(Connection connection) throws JDBCException {
+		double minSalary = 0;
+		try {
+			preparedStatement = connection.prepareStatement("select min(salary) from employees where gender = \"Male\"");
+			ResultSet result = preparedStatement.executeQuery();
+			while(result.next()) {
+				minSalary = result.getInt(1);
+				break;
+			}
+			preparedStatement.close();
+		} catch (SQLException exception) {
+			throw new JDBCException("Error while running group statements with prepared Statement ");
+		}
+		return minSalary;
+	}
+
+	public double groupFunctionMax(Connection connection) throws JDBCException {
+		double maxSalary = 0;
+		try {
+			preparedStatement = connection.prepareStatement("select max(salary) from employees where gender = \"Male\"");
+			ResultSet result = preparedStatement.executeQuery();
+			while(result.next()) {
+				maxSalary = result.getInt(1);
+				break;
+			}
+			preparedStatement.close();
+		} catch (SQLException exception) {
+			throw new JDBCException("Error while running group statements with prepared Statement ");
+		}
+		return maxSalary;
+	}
+
+	public double groupFunctionAvg(Connection connection) throws JDBCException {
+		double avgSalary = 0;
+		try {
+			preparedStatement = connection.prepareStatement("select avg(salary) from employees where gender = \"Female\"");
+			ResultSet result = preparedStatement.executeQuery();
+			while(result.next()) {
+				avgSalary = result.getInt(1);
+				break;
+			}
+			preparedStatement.close();
+		} catch (SQLException exception) {
+			throw new JDBCException("Error while running group statements with prepared Statement ");
+		}
+		return avgSalary;
 	}
 }
