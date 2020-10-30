@@ -149,6 +149,7 @@ public class EmployeeDatabaseTest
 		List<Employees> employees2 = payDataService.getListFromDatabase(connection);
 		Employees employees3 = (Employees)employees2.get(employees2.size()-1);
 		assertTrue(employees3.equals(employees));
+		payDataService.deleteRecord(connection,employees2.size());
     }
     
     @After

@@ -297,4 +297,15 @@ public class PayrollDatabaseService {
 			throw new JDBCException("Error while running group statements with prepared Statement " + exception.getMessage());
 		}
 	}
+
+	public void deleteRecord(Connection connection, int size) throws JDBCException {
+		try {
+			preparedStatement = connection.prepareStatement("delete from employees where employee_id = ?");
+			preparedStatement.setInt(1, size);
+			preparedStatement.execute();
+			preparedStatement.close();
+		} catch (SQLException exception) {
+			throw new JDBCException("Error while running group statements with prepared Statement " + exception.getMessage());
+		}
+	}
 }
