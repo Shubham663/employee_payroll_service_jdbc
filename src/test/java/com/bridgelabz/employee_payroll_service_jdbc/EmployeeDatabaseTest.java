@@ -235,6 +235,39 @@ public class EmployeeDatabaseTest
 		payDataService.deleteRecordEmployeePayrollAfterCascade(connection,employees.getEmployeeID(),departments.getId());
     }
     
+    @Test
+    public void deleteEmployeePayrollInDatabaseTransactions() throws JDBCException
+    {
+    	Employees employees = new Employees();
+    	employees.setEmployeeID(7);
+    	employees.setName("Garry");
+    	employees.setBasicPay(50000);
+    	employees.setSalary(50000);
+    	employees.setDeductions(10000);
+    	employees.setGender("Male");
+    	employees.setIncomeTax(4000);
+    	employees.setNetPay(46000);
+    	employees.setPhoneNumber(8676754675l);
+    	Date date = Date.valueOf("2020-08-01");
+    	employees.setStart_date(date);
+    	employees.setTaxablePay(40000);
+    	EmployeePayroll employeePayroll = new EmployeePayroll();
+    	Departments departments = new Departments();
+    	departments.setAddress("Lucknow");
+    	departments.setDepartmentName("HR");
+    	departments.setId(5);
+    	EmployeesNoPayroll employeesNoPayroll = new EmployeesNoPayroll(employees.getName(), employees.getEmployeeID(), employees.getStart_date(), employees.getGender(), employees.getPhoneNumber());
+    	Payroll payroll = new Payroll(employees.getBasicPay(), employees.getDeductions(), employees.getTaxablePay(), employees.getIncomeTax(), employees.getNetPay());
+    	employeePayroll.setEmployee(employeesNoPayroll);
+    	employeePayroll.setPayroll(payroll);
+    	employeePayroll.getDepartments().add(departments);
+    	payDataService.addEmployeePayrollWhole(connection,employeePayroll,employees);
+		payDataService.removeEmployeePayroll(connection,employees.getEmployeeID());
+		List<EmployeesNoPayroll> employeesNoPayrolls = payDataService.getListFromDatabaseIsActive(connection);
+		payDataService.deleteRecordEmployeePayrollAfterCascade(connection,employees.getEmployeeID(),departments.getId());
+		System.out.println(employeesNoPayrolls);
+    }
+    
     @After
     public void endMethod() throws JDBCException {
     	try {
