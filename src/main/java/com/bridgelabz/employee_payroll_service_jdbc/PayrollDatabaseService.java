@@ -271,14 +271,10 @@ public class PayrollDatabaseService {
 			preparedStatement.setString(2, employees.getName());
 			preparedStatement.setDouble(3, employees.getSalary());
 			SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-mm-dd");
-//			String stringDate = employees.getStart_date().;
-//			Date date = Date.valueOf(stringDate);
 			java.util.Date date0 = null;
-//			String stringDate = simpleDateFormat.format(employees.getStart_date().toString());
 			try {
 				date0 = simpleDateFormat.parse(employees.getStart_date().toString());
 			} catch (ParseException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 			String stringDate = simpleDateFormat.format(date0);
@@ -302,6 +298,125 @@ public class PayrollDatabaseService {
 		try {
 			preparedStatement = connection.prepareStatement("delete from employees where employee_id = ?");
 			preparedStatement.setInt(1, size);
+			preparedStatement.execute();
+			preparedStatement.close();
+		} catch (SQLException exception) {
+			throw new JDBCException("Error while running group statements with prepared Statement " + exception.getMessage());
+		}
+	}
+
+	public void addEmployeePayroll(Connection connection, Employees employees) throws JDBCException {
+		try {
+			preparedStatement = connection.prepareStatement("insert into employees_no_payroll values(?,?,?,?,?)");
+			preparedStatement.setInt(1, employees.getEmployeeID());
+			preparedStatement.setString(2, employees.getName());
+			SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-mm-dd");
+			java.util.Date date0 = null;
+			try {
+				date0 = simpleDateFormat.parse(employees.getStart_date().toString());
+			} catch (ParseException e) {
+				e.printStackTrace();
+			}
+			String stringDate = simpleDateFormat.format(date0);
+			Date date = Date.valueOf(stringDate);
+			preparedStatement.setDate(3, date);
+			preparedStatement.setString(4, employees.getGender());
+			preparedStatement.setLong(5, employees.getPhoneNumber());
+			preparedStatement.execute();
+			logger.info("Successfully added data to table employees no payroll");
+			try {
+				preparedStatement = connection.prepareStatement("insert into payroll values(?,?,?,?,?)");
+				preparedStatement.setDouble(1, employees.getBasicPay());
+				preparedStatement.setDouble(2, employees.getDeductions());
+				preparedStatement.setDouble(3, employees.getTaxablePay());
+				preparedStatement.setDouble(4, employees.getIncomeTax());
+				preparedStatement.setDouble(5, employees.getNetPay());
+				preparedStatement.execute();
+				logger.info("Successfully added data to table payroll");
+			}
+			catch(SQLException exception) {
+				logger.info("Data already present inside the table " + exception.getMessage());
+			}
+			preparedStatement = connection.prepareStatement("insert into employee_payroll_map values(?,?)");
+			preparedStatement.setDouble(1, employees.getBasicPay());
+			preparedStatement.setInt(2, employees.getEmployeeID());
+			preparedStatement.execute();
+			logger.info("Successfully added data to table employees payroll map");
+			preparedStatement.close();
+		} catch (SQLException exception) {
+			throw new JDBCException("Error while inserting data into multiple tables with prepared Statement " + exception.getMessage());
+		}
+	}
+
+	public List<Payroll> getListFromDatabasePayroll(Connection connection) throws JDBCException {
+		ResultSet result = null;
+		List<Payroll> listPayrolls = null;
+		try {
+			preparedStatement = connection.prepareStatement("select * from payroll");
+			result = preparedStatement.executeQuery();
+			listPayrolls = new ArrayList<>();
+			while (result.next()) {
+				Payroll payroll = new Payroll();
+				payroll.setBasicPay(result.getDouble(1));
+				payroll.setDeductions(result.getDouble(2));
+				payroll.setTaxablePay(result.getDouble(3));
+				payroll.setIncomeTax(result.getDouble(4));
+				payroll.setNetPay(result.getDouble(5));
+				listPayrolls.add(payroll);
+			}
+			logger.info("List successfully retrieved from database");
+		} catch (SQLException exception) {
+			throw new JDBCException("Error while retrieving data");
+		} finally {
+			try {
+				if (result != null)
+					result.close();
+			} catch (SQLException e) {
+				throw new JDBCException(
+						"Error while closing resources when retrieving data" + connection + e.getMessage());
+			}
+		}
+		return listPayrolls;
+	}
+
+	public List<EmployeesNoPayroll> getListFromDatabaseEmployeeNoPayroll(Connection connection) throws JDBCException {
+		ResultSet result = null;
+		List<EmployeesNoPayroll> listEmployees = null;
+		try {
+			preparedStatement = connection.prepareStatement("select * from employees_no_payroll");
+			result = preparedStatement.executeQuery();			
+			listEmployees = new ArrayList<>();
+			while (result.next()) {
+				EmployeesNoPayroll employee = new EmployeesNoPayroll();
+				employee.setEmployeeID(result.getInt(1));
+				employee.setName(result.getString(2));
+				employee.setStart_date(result.getDate(3));
+				employee.setGender(result.getString(4));
+				employee.setPhoneNumber(result.getLong(5));
+				listEmployees.add(employee);
+			}
+			logger.info("List successfully retrieved from database");
+		} catch (SQLException exception) {
+			throw new JDBCException("Error while retrieving data");
+		} finally {
+			try {
+				if (result != null)
+					result.close();
+			} catch (SQLException e) {
+				throw new JDBCException(
+						"Error while closing resources when retrieving data" + connection + e.getMessage());
+			}
+		}
+		return listEmployees;
+	}
+
+	public void deleteRecordPayroll(Connection connection, int employeeID) throws JDBCException {
+		try {
+			preparedStatement = connection.prepareStatement("delete from employee_payroll_map where employee_id = ?");
+			preparedStatement.setInt(1, employeeID);
+			preparedStatement.execute();
+			preparedStatement = connection.prepareStatement("delete from employees_no_payroll where employee_id = ?");
+			preparedStatement.setInt(1, employeeID);
 			preparedStatement.execute();
 			preparedStatement.close();
 		} catch (SQLException exception) {

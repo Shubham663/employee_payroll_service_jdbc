@@ -152,6 +152,30 @@ public class EmployeeDatabaseTest
 		payDataService.deleteRecord(connection,employees2.size());
     }
     
+    @Test
+    public void addEmployeeInDatabasePayroll() throws JDBCException
+    {
+    	Employees employees = new Employees();
+    	employees.setEmployeeID(7);
+    	employees.setName("Garry");
+    	employees.setBasicPay(50000);
+    	employees.setSalary(50000);
+    	employees.setDeductions(10000);
+    	employees.setGender("Male");
+    	employees.setIncomeTax(4000);
+    	employees.setNetPay(46000);
+    	employees.setPhoneNumber(8676754675l);
+    	Date date = Date.valueOf("2020-08-01");
+    	employees.setStart_date(date);
+    	employees.setTaxablePay(40000);
+		payDataService.addEmployeePayroll(connection, employees);
+		List<EmployeesNoPayroll> employeesNoPayrolls = payDataService.getListFromDatabaseEmployeeNoPayroll(connection);
+		EmployeesNoPayroll employeesNoPayroll = new EmployeesNoPayroll(employees.getName(), employees.getEmployeeID(), employees.getStart_date(), employees.getGender(), employees.getPhoneNumber());
+		EmployeesNoPayroll employeesNoPayroll2 = employeesNoPayrolls.get(employeesNoPayrolls.size()-1);
+		assertTrue(employeesNoPayroll.equals(employeesNoPayroll2));
+		payDataService.deleteRecordPayroll(connection,employees.getEmployeeID());
+    }
+    
     @After
     public void endMethod() throws JDBCException {
     	try {
