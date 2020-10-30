@@ -307,6 +307,7 @@ public class PayrollDatabaseService {
 
 	public void addEmployeePayroll(Connection connection, Employees employees) throws JDBCException {
 		try {
+			connection.setAutoCommit(false);
 			preparedStatement = connection.prepareStatement("insert into employees_no_payroll values(?,?,?,?,?)");
 			preparedStatement.setInt(1, employees.getEmployeeID());
 			preparedStatement.setString(2, employees.getName());
@@ -342,8 +343,15 @@ public class PayrollDatabaseService {
 			preparedStatement.setInt(2, employees.getEmployeeID());
 			preparedStatement.execute();
 			logger.info("Successfully added data to table employees payroll map");
+			connection.commit();
+			connection.setAutoCommit(true);
 			preparedStatement.close();
 		} catch (SQLException exception) {
+			try {
+				connection.rollback();
+			} catch (SQLException e) {
+				throw new JDBCException("Error when trying to perform rollback on connection " + e.getMessage());
+			}
 			throw new JDBCException("Error while inserting data into multiple tables with prepared Statement " + exception.getMessage());
 		}
 	}
@@ -415,6 +423,20 @@ public class PayrollDatabaseService {
 			preparedStatement = connection.prepareStatement("delete from employee_payroll_map where employee_id = ?");
 			preparedStatement.setInt(1, employeeID);
 			preparedStatement.execute();
+			preparedStatement = connection.prepareStatement("delete from employees_no_payroll where employee_id = ?");
+			preparedStatement.setInt(1, employeeID);
+			preparedStatement.execute();
+			preparedStatement.close();
+		} catch (SQLException exception) {
+			throw new JDBCException("Error while running group statements with prepared Statement " + exception.getMessage());
+		}
+	}
+
+	public void deleteRecordPayrollAfterCascade(Connection connection, int employeeID) throws JDBCException {
+		try {
+//			preparedStatement = connection.prepareStatement("delete from employee_payroll_map where employee_id = ?");
+//			preparedStatement.setInt(1, employeeID);
+//			preparedStatement.execute();
 			preparedStatement = connection.prepareStatement("delete from employees_no_payroll where employee_id = ?");
 			preparedStatement.setInt(1, employeeID);
 			preparedStatement.execute();
