@@ -176,4 +176,32 @@ public class Employees {
 				+ ", taxablePay=" + taxablePay + ", incomeTax=" + incomeTax + ", netPay=" + netPay + ", phoneNumber="
 				+ phoneNumber + "\n";
 	}
+	
+	@Override
+	public boolean equals(Object obj) {
+		Employees employees = (Employees)obj;
+		if(this.getEmployeeID() != employees.getEmployeeID())
+			return false;
+		if(this.getName().compareTo(employees.getName()) != 0)
+			return false;
+		if(this.getSalary() != employees.getSalary())
+			return false;
+		if(this.getStart_date().compareTo(employees.getStart_date()) != 0)
+			return false;
+		if(this.getGender().compareTo(employees.getGender()) != 0)
+			return false;
+		if(this.getBasicPay() != employees.getBasicPay() )
+			return false;
+		if(this.getDeductions() != employees.getDeductions() )
+			return false;
+		if(this.getTaxablePay() != employees.getTaxablePay() )
+			return false;
+		if(this.getIncomeTax() != employees.getIncomeTax() )
+			return false;
+		if(this.getNetPay() != employees.getNetPay() )
+			return false;
+		if(this.getPhoneNumber() != employees.getPhoneNumber() )
+			return false;
+		return true;
+	}
 }
