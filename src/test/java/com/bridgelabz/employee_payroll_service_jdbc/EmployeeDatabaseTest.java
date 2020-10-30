@@ -129,10 +129,33 @@ public class EmployeeDatabaseTest
         assertEquals(3000000, salary,0);
     }
     
+    @Test
+    public void addEmployeeInDatabase() throws JDBCException
+    {
+    	Employees employees = new Employees();
+    	employees.setEmployeeID(7);
+    	employees.setName("Garry");
+    	employees.setBasicPay(50000);
+    	employees.setSalary(50000);
+    	employees.setDeductions(30000);
+    	employees.setGender("Male");
+    	employees.setIncomeTax(3600);
+    	employees.setNetPay(16400);
+    	employees.setPhoneNumber(8676754675l);
+    	Date date = Date.valueOf("2020-08-01");
+    	employees.setStart_date(date);
+    	employees.setTaxablePay(20000);
+		payDataService.addEmployee(connection, employees);
+		List<Employees> employees2 = payDataService.getListFromDatabase(connection);
+		Employees employees3 = (Employees)employees2.get(employees2.size()-1);
+		assertTrue(employees3.equals(employees));
+    }
+    
     @After
     public void endMethod() throws JDBCException {
     	try {
-				payDataService.getPreparedStatement().close();
+    			if(payDataService.getPreparedStatement() != null)
+    				payDataService.getPreparedStatement().close();
 			}catch(SQLException exception) {
 				throw new JDBCException("Error while closing resources when updating database prepared database" + connection + exception.getMessage());
 			}

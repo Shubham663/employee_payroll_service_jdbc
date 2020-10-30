@@ -8,6 +8,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Enumeration;
@@ -157,7 +158,6 @@ public class PayrollDatabaseService {
 			listEmployees = new ArrayList<>();
 			try {
 				while (result.next()) {
-					SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-mm-dd");
 					Employees employee = new Employees();
 					employee.setEmployeeID(result.getInt(1));
 					employee.setName(result.getString(2));
@@ -261,5 +261,40 @@ public class PayrollDatabaseService {
 			throw new JDBCException("Error while running group statements with prepared Statement ");
 		}
 		return avgSalary;
+	}
+
+	public void addEmployee(Connection connection, Employees employees) throws JDBCException {
+		List<Employees> listEmployees = null;
+		try {
+			preparedStatement = connection.prepareStatement("insert into employees values(?,?,?,?,?,?,?,?,?,?,?)");
+			preparedStatement.setInt(1, employees.getEmployeeID());
+			preparedStatement.setString(2, employees.getName());
+			preparedStatement.setDouble(3, employees.getSalary());
+			SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-mm-dd");
+//			String stringDate = employees.getStart_date().;
+//			Date date = Date.valueOf(stringDate);
+			java.util.Date date0 = null;
+//			String stringDate = simpleDateFormat.format(employees.getStart_date().toString());
+			try {
+				date0 = simpleDateFormat.parse(employees.getStart_date().toString());
+			} catch (ParseException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			String stringDate = simpleDateFormat.format(date0);
+			Date date = Date.valueOf(stringDate);
+			preparedStatement.setDate(4, date);
+			preparedStatement.setString(5, employees.getGender());
+			preparedStatement.setDouble(6, employees.getBasicPay());
+			preparedStatement.setDouble(7, employees.getDeductions());
+			preparedStatement.setDouble(8, employees.getTaxablePay());
+			preparedStatement.setDouble(9, employees.getIncomeTax());
+			preparedStatement.setDouble(10, employees.getNetPay());
+			preparedStatement.setLong(11, employees.getPhoneNumber());
+			preparedStatement.execute();
+			preparedStatement.close();
+		} catch (SQLException exception) {
+			throw new JDBCException("Error while running group statements with prepared Statement " + exception.getMessage());
+		}
 	}
 }
