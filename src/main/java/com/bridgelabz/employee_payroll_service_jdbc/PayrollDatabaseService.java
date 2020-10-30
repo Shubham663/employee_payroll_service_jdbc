@@ -445,4 +445,50 @@ public class PayrollDatabaseService {
 			throw new JDBCException("Error while running group statements with prepared Statement " + exception.getMessage());
 		}
 	}
+
+	public void addEmployeePayrollWhole(Connection connection, EmployeePayroll employeePayroll,Employees employees) throws JDBCException {
+		this.addEmployeePayroll(connection, employees);
+		
+		try {
+			connection.setAutoCommit(false);
+			for(Departments departments : employeePayroll.getDepartments()) {
+				preparedStatement = connection.prepareStatement("insert into department values(?,?,?)");
+				preparedStatement.setString(1, departments.getDepartmentName());
+				preparedStatement.setString(2, departments.getAddress());
+				preparedStatement.setInt(3, departments.getId());
+				preparedStatement.execute();
+				logger.info("Successfully added data to table department");
+				preparedStatement = connection.prepareStatement("insert into empid_departmentid values(?,?)");
+				preparedStatement.setInt(1, employees.getEmployeeID());
+				preparedStatement.setInt(2, departments.getId());
+				preparedStatement.execute();
+				logger.info("Successfully added data to table empid_departmentid");
+				connection.commit();
+			}
+			connection.setAutoCommit(true);
+			preparedStatement.close();
+		} catch (SQLException exception) {
+			try {
+				connection.rollback();
+			} catch (SQLException e) {
+				throw new JDBCException("Error when trying to perform rollback on connection " + e.getMessage());
+			}
+			throw new JDBCException("Error while inserting data into multiple tables with prepared Statement " + exception.getMessage());
+		}
+	}
+
+	public void deleteRecordEmployeePayrollAfterCascade(Connection connection, int employeeID, int departmentID) throws JDBCException {
+		try {
+			preparedStatement = connection.prepareStatement("delete from employees_no_payroll where employee_id = ?");
+			preparedStatement.setInt(1, employeeID);
+			preparedStatement.execute();
+			preparedStatement = connection.prepareStatement("delete from department where id = ?");
+			preparedStatement.setInt(1, departmentID);
+			preparedStatement.execute();
+			logger.info("Successfull deletion from employee_no_payroll, employee_payroll_map, department, empid_departmentid tables");
+			preparedStatement.close();
+		} catch (SQLException exception) {
+			throw new JDBCException("Error while running group statements with prepared Statement " + exception.getMessage());
+		}
+	}
 }
