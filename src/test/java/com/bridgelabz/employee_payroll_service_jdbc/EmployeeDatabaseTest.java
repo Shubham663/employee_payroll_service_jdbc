@@ -3,9 +3,12 @@ package com.bridgelabz.employee_payroll_service_jdbc;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import java.awt.dnd.DropTargetListener;
 import java.sql.Connection;
 import java.sql.Date;
 import java.sql.SQLException;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.List;
 
 import org.apache.logging.log4j.LogManager;
@@ -220,7 +223,7 @@ public class EmployeeDatabaseTest
     	Departments departments = new Departments();
     	departments.setAddress("Lucknow");
     	departments.setDepartmentName("HR");
-    	departments.setId(5);
+    	departments.setId(7);
     	EmployeesNoPayroll employeesNoPayroll = new EmployeesNoPayroll(employees.getName(), employees.getEmployeeID(), employees.getStart_date(), employees.getGender(), employees.getPhoneNumber());
     	Payroll payroll = new Payroll(employees.getBasicPay(), employees.getDeductions(), employees.getTaxablePay(), employees.getIncomeTax(), employees.getNetPay());
     	employeePayroll.setEmployee(employeesNoPayroll);
@@ -255,7 +258,7 @@ public class EmployeeDatabaseTest
     	Departments departments = new Departments();
     	departments.setAddress("Lucknow");
     	departments.setDepartmentName("HR");
-    	departments.setId(5);
+    	departments.setId(7);
     	EmployeesNoPayroll employeesNoPayroll = new EmployeesNoPayroll(employees.getName(), employees.getEmployeeID(), employees.getStart_date(), employees.getGender(), employees.getPhoneNumber());
     	Payroll payroll = new Payroll(employees.getBasicPay(), employees.getDeductions(), employees.getTaxablePay(), employees.getIncomeTax(), employees.getNetPay());
     	employeePayroll.setEmployee(employeesNoPayroll);
@@ -266,6 +269,26 @@ public class EmployeeDatabaseTest
 		List<EmployeesNoPayroll> employeesNoPayrolls = payDataService.getListFromDatabaseIsActive(connection);
 		payDataService.deleteRecordEmployeePayrollAfterCascade(connection,employees.getEmployeeID(),departments.getId());
 		System.out.println(employeesNoPayrolls);
+    }
+    
+    @Test
+    public void addEmployeesNoPayrollInDatabase() throws JDBCException
+    {
+    	Date date = Date.valueOf("2020-08-01");
+    	Employees employees = new Employees("Garry", 7, 50000, date, "Male", 50000, 10000, 40000, 4000, 46000, 8676754675l);
+    	Employees employees2 = new Employees("Harry", 8, 50000, date, "Male", 50000, 10000, 40000, 4000, 46000, 8698754675l);
+    	listEmployees.clear();
+    	listEmployees.add(employees);
+    	listEmployees.add(employees2);
+    	Instant start = Instant.now();
+    	payDataService.addMultipleEmployees(connection,listEmployees);
+		Instant end = Instant.now();
+		System.out.println("Execution time : " + Duration.between(start, end));
+		for(Employees employees3 : listEmployees) {
+			payDataService.deleteRecord(connection,employees3.getEmployeeID());
+		}
+		listEmployees = payDataService.getListFromDatabase(connection);
+		assertEquals(6, listEmployees.size());
     }
     
     @After

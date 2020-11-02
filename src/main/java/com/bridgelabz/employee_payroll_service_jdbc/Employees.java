@@ -14,6 +14,38 @@ public class Employees {
 	private double incomeTax;
 	private double netPay;
 	private long phoneNumber;
+	
+	public Employees() {
+	}
+
+	/**
+	 * @param name
+	 * @param employeeID
+	 * @param salary
+	 * @param start_date
+	 * @param gender
+	 * @param basicPay
+	 * @param deductions
+	 * @param taxablePay
+	 * @param incomeTax
+	 * @param netPay
+	 * @param phoneNumber
+	 */
+	public Employees(String name, int employeeID, double salary, Date start_date, String gender, double basicPay,
+			double deductions, double taxablePay, double incomeTax, double netPay, long phoneNumber) {
+		super();
+		this.name = name;
+		this.employeeID = employeeID;
+		this.salary = salary;
+		this.start_date = start_date;
+		this.gender = gender;
+		this.basicPay = basicPay;
+		this.deductions = deductions;
+		this.taxablePay = taxablePay;
+		this.incomeTax = incomeTax;
+		this.netPay = netPay;
+		this.phoneNumber = phoneNumber;
+	}
 
 	/**
 	 * @return the name
