@@ -3,7 +3,6 @@ package com.bridgelabz.employee_payroll_service_jdbc;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-import java.awt.dnd.DropTargetListener;
 import java.sql.Connection;
 import java.sql.Date;
 import java.sql.SQLException;
@@ -291,7 +290,6 @@ public class EmployeeDatabaseTest
 		assertEquals(6, listEmployees.size());
     }
     
-    @After
     public void endMethod() throws JDBCException {
     	try {
     			if(payDataService.getPreparedStatement() != null)

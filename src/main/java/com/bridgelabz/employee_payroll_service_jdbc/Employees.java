@@ -1,6 +1,7 @@
 package com.bridgelabz.employee_payroll_service_jdbc;
 
 import java.util.Date;
+import java.util.Objects;
 
 public class Employees {
 	private String name;
@@ -14,6 +15,11 @@ public class Employees {
 	private double incomeTax;
 	private double netPay;
 	private long phoneNumber;
+	
+	@Override
+	public int hashCode() {
+		return Objects.hash(name,gender,salary,start_date);
+	}
 	
 	public Employees() {
 	}
