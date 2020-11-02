@@ -306,24 +306,37 @@ public class PayrollDatabaseService {
 	}
 
 	public void addEmployeePayroll(Connection connection, Employees employees) throws JDBCException {
+		ResultSet result = null;
 		try {
 			connection.setAutoCommit(false);
-			preparedStatement = connection.prepareStatement("insert into employees_no_payroll values(?,?,?,?,?,?)");
+			preparedStatement = connection.prepareStatement("select name from employees_no_payroll where employee_id = ?");
 			preparedStatement.setInt(1, employees.getEmployeeID());
-			preparedStatement.setString(2, employees.getName());
-			SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-mm-dd");
-			java.util.Date date0 = null;
-			try {
-				date0 = simpleDateFormat.parse(employees.getStart_date().toString());
-			} catch (ParseException e) {
-				e.printStackTrace();
+			result = preparedStatement.executeQuery();
+			boolean isPresent = result.next();
+//			String s = result.getString(1);
+			if(!isPresent) {
+				preparedStatement = connection.prepareStatement("insert into employees_no_payroll values(?,?,?,?,?,?)");
+				preparedStatement.setInt(1, employees.getEmployeeID());
+				preparedStatement.setString(2, employees.getName());
+				SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-mm-dd");
+				java.util.Date date0 = null;
+				try {
+					date0 = simpleDateFormat.parse(employees.getStart_date().toString());
+				} catch (ParseException e) {
+					e.printStackTrace();
+				}
+				String stringDate = simpleDateFormat.format(date0);
+				Date date = Date.valueOf(stringDate);
+				preparedStatement.setDate(3, date);
+				preparedStatement.setString(4, employees.getGender());
+				preparedStatement.setLong(5, employees.getPhoneNumber());
+				preparedStatement.setInt(6, 1);
 			}
-			String stringDate = simpleDateFormat.format(date0);
-			Date date = Date.valueOf(stringDate);
-			preparedStatement.setDate(3, date);
-			preparedStatement.setString(4, employees.getGender());
-			preparedStatement.setLong(5, employees.getPhoneNumber());
-			preparedStatement.setInt(6, 1);
+			else {
+				logger.info("The details are already present inside addressbook. If were deactivated, once again active");
+				preparedStatement = connection.prepareStatement("update employees_no_payroll set is_active = 1 where employee_id = ?");
+				preparedStatement.setInt(1, employees.getEmployeeID());
+			}
 			preparedStatement.execute();
 			logger.info("Successfully added data to table employees no payroll");
 			try {
@@ -534,5 +547,39 @@ public class PayrollDatabaseService {
 			}
 		}
 		return listEmployees;
+	}
+
+	public void addMultipleEmployees(Connection connection, List<Employees> listEmployees2) throws JDBCException {
+		List<Employees> listEmployees = null;
+		try {
+			for(Employees employees : listEmployees2) {
+				addEmployee(connection, employees);
+//				preparedStatement = connection.prepareStatement("insert into employees values(?,?,?,?,?,?,?,?,?,?,?)");
+//				preparedStatement.setInt(1, employees.getEmployeeID());
+//				preparedStatement.setString(2, employees.getName());
+//				preparedStatement.setDouble(3, employees.getSalary());
+//				SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-mm-dd");
+//				java.util.Date date0 = null;
+//				try {
+//					date0 = simpleDateFormat.parse(employees.getStart_date().toString());
+//				} catch (ParseException e) {
+//					e.printStackTrace();
+//				}
+//				String stringDate = simpleDateFormat.format(date0);
+//				Date date = Date.valueOf(stringDate);
+//				preparedStatement.setDate(4, date);
+//				preparedStatement.setString(5, employees.getGender());
+//				preparedStatement.setDouble(6, employees.getBasicPay());
+//				preparedStatement.setDouble(7, employees.getDeductions());
+//				preparedStatement.setDouble(8, employees.getTaxablePay());
+//				preparedStatement.setDouble(9, employees.getIncomeTax());
+//				preparedStatement.setDouble(10, employees.getNetPay());
+//				preparedStatement.setLong(11, employees.getPhoneNumber());
+//				preparedStatement.execute();
+			}
+//			preparedStatement.close();
+		} catch (JDBCException exception) {
+			throw new JDBCException("Error while adding multiple elements to database " + exception.getMessage());
+		}
 	}
 }
