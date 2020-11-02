@@ -12,7 +12,9 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -140,7 +142,7 @@ public class PayrollDatabaseService {
 			preparedStatement.setDouble(1, 4000000);
 			preparedStatement.setString(2, "Terisa");
 			preparedStatement.execute();
-			preparedStatement.close();
+//			preparedStatement.close();
 		} catch (SQLException exception) {
 			throw new JDBCException("Error while updating with prepared Statement ");
 		}
@@ -176,7 +178,7 @@ public class PayrollDatabaseService {
 			} catch (SQLException exception) {
 				throw new JDBCException("Error while retrieving data");
 			}
-			preparedStatement.close();
+//			preparedStatement.close();
 		} catch (SQLException exception) {
 			throw new JDBCException("Error while getting recods with prepared Statement ");
 		}
@@ -192,7 +194,7 @@ public class PayrollDatabaseService {
 				count = result.getInt(1);
 				break;
 			}
-			preparedStatement.close();
+//			preparedStatement.close();
 		} catch (SQLException exception) {
 			throw new JDBCException("Error while running group statements with prepared Statement ");
 		}
@@ -208,7 +210,7 @@ public class PayrollDatabaseService {
 				salarySum = result.getInt(1);
 				break;
 			}
-			preparedStatement.close();
+//			preparedStatement.close();
 		} catch (SQLException exception) {
 			throw new JDBCException("Error while running group statements with prepared Statement ");
 		}
@@ -224,7 +226,7 @@ public class PayrollDatabaseService {
 				minSalary = result.getInt(1);
 				break;
 			}
-			preparedStatement.close();
+//			preparedStatement.close();
 		} catch (SQLException exception) {
 			throw new JDBCException("Error while running group statements with prepared Statement ");
 		}
@@ -240,7 +242,7 @@ public class PayrollDatabaseService {
 				maxSalary = result.getInt(1);
 				break;
 			}
-			preparedStatement.close();
+//			preparedStatement.close();
 		} catch (SQLException exception) {
 			throw new JDBCException("Error while running group statements with prepared Statement ");
 		}
@@ -256,7 +258,7 @@ public class PayrollDatabaseService {
 				avgSalary = result.getInt(1);
 				break;
 			}
-			preparedStatement.close();
+//			preparedStatement.close();
 		} catch (SQLException exception) {
 			throw new JDBCException("Error while running group statements with prepared Statement ");
 		}
@@ -288,7 +290,7 @@ public class PayrollDatabaseService {
 			preparedStatement.setDouble(10, employees.getNetPay());
 			preparedStatement.setLong(11, employees.getPhoneNumber());
 			preparedStatement.execute();
-			preparedStatement.close();
+//			preparedStatement.close();
 		} catch (SQLException exception) {
 			throw new JDBCException("Error while running group statements with prepared Statement " + exception.getMessage());
 		}
@@ -296,10 +298,10 @@ public class PayrollDatabaseService {
 
 	public void deleteRecord(Connection connection, int size) throws JDBCException {
 		try {
-			preparedStatement = connection.prepareStatement("delete from employees where employee_id = ?");
+			preparedStatement = connection.prepareStatement("delete from employees where employee_id = ? ");
 			preparedStatement.setInt(1, size);
 			preparedStatement.execute();
-			preparedStatement.close();
+//			preparedStatement.close();
 		} catch (SQLException exception) {
 			throw new JDBCException("Error while running group statements with prepared Statement " + exception.getMessage());
 		}
@@ -359,7 +361,7 @@ public class PayrollDatabaseService {
 			logger.info("Successfully added data to table employees payroll map");
 			connection.commit();
 			connection.setAutoCommit(true);
-			preparedStatement.close();
+//			preparedStatement.close();
 		} catch (SQLException exception) {
 			try {
 				connection.rollback();
@@ -440,7 +442,7 @@ public class PayrollDatabaseService {
 			preparedStatement = connection.prepareStatement("delete from employees_no_payroll where employee_id = ?");
 			preparedStatement.setInt(1, employeeID);
 			preparedStatement.execute();
-			preparedStatement.close();
+//			preparedStatement.close();
 		} catch (SQLException exception) {
 			throw new JDBCException("Error while running group statements with prepared Statement " + exception.getMessage());
 		}
@@ -451,7 +453,7 @@ public class PayrollDatabaseService {
 			preparedStatement = connection.prepareStatement("delete from employees_no_payroll where employee_id = ?");
 			preparedStatement.setInt(1, employeeID);
 			preparedStatement.execute();
-			preparedStatement.close();
+//			preparedStatement.close();
 		} catch (SQLException exception) {
 			throw new JDBCException("Error while running group statements with prepared Statement " + exception.getMessage());
 		}
@@ -477,7 +479,7 @@ public class PayrollDatabaseService {
 				connection.commit();
 			}
 			connection.setAutoCommit(true);
-			preparedStatement.close();
+//			preparedStatement.close();
 		} catch (SQLException exception) {
 			try {
 				connection.rollback();
@@ -497,7 +499,7 @@ public class PayrollDatabaseService {
 			preparedStatement.setInt(1, departmentID);
 			preparedStatement.execute();
 			logger.info("Successfull deletion from employee_no_payroll, employee_payroll_map, department, empid_departmentid tables");
-			preparedStatement.close();
+//			preparedStatement.close();
 		} catch (SQLException exception) {
 			throw new JDBCException("Error while running group statements with prepared Statement " + exception.getMessage());
 		}
@@ -512,7 +514,7 @@ public class PayrollDatabaseService {
 ////			preparedStatement.setInt(1, departmentID);
 //			preparedStatement.execute();
 			logger.info("Successfully set employee_no_payroll is_active to false");
-			preparedStatement.close();
+//			preparedStatement.close();
 		} catch (SQLException exception) {
 			throw new JDBCException("Error while running group statements with prepared Statement " + exception.getMessage());
 		}
@@ -582,4 +584,5 @@ public class PayrollDatabaseService {
 			throw new JDBCException("Error while adding multiple elements to database " + exception.getMessage());
 		}
 	}
+
 }
