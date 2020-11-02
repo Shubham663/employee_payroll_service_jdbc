@@ -556,33 +556,45 @@ public class PayrollDatabaseService {
 		try {
 			for(Employees employees : listEmployees2) {
 				addEmployee(connection, employees);
-//				preparedStatement = connection.prepareStatement("insert into employees values(?,?,?,?,?,?,?,?,?,?,?)");
-//				preparedStatement.setInt(1, employees.getEmployeeID());
-//				preparedStatement.setString(2, employees.getName());
-//				preparedStatement.setDouble(3, employees.getSalary());
-//				SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-mm-dd");
-//				java.util.Date date0 = null;
-//				try {
-//					date0 = simpleDateFormat.parse(employees.getStart_date().toString());
-//				} catch (ParseException e) {
-//					e.printStackTrace();
-//				}
-//				String stringDate = simpleDateFormat.format(date0);
-//				Date date = Date.valueOf(stringDate);
-//				preparedStatement.setDate(4, date);
-//				preparedStatement.setString(5, employees.getGender());
-//				preparedStatement.setDouble(6, employees.getBasicPay());
-//				preparedStatement.setDouble(7, employees.getDeductions());
-//				preparedStatement.setDouble(8, employees.getTaxablePay());
-//				preparedStatement.setDouble(9, employees.getIncomeTax());
-//				preparedStatement.setDouble(10, employees.getNetPay());
-//				preparedStatement.setLong(11, employees.getPhoneNumber());
-//				preparedStatement.execute();
 			}
-//			preparedStatement.close();
 		} catch (JDBCException exception) {
 			throw new JDBCException("Error while adding multiple elements to database " + exception.getMessage());
 		}
 	}
+	
 
+	public void addMultipleEmployeesThreads(Connection connection, List<Employees> listEmployees2) {
+		Map<Integer, Boolean> employeeAddStatus = new HashMap<>();
+		listEmployees2.forEach(employee ->{
+			Runnable task = () -> {
+				Connection connection2 = null;
+				try {
+					 connection2 = connectToDatabase(connection);
+				} catch (JDBCException e1) {
+					logger.error("Error while getting another connection");
+				}	
+				employeeAddStatus.put(employee.hashCode(), false);
+				try {
+					addEmployee(connection2, employee);
+				} catch (JDBCException e) {
+					logger.error("Error when adding employee " + e.getMessage());
+				}
+				employeeAddStatus.put(employee.hashCode(), true);
+			};
+			Thread thread = new Thread(task,employee.getName());
+			thread.start();
+			try{
+				Thread.sleep(10);
+			}catch(InterruptedException exception) {
+				logger.error("Error while waiting for ");
+			}
+		});
+			while(employeeAddStatus.containsValue(false)) {
+				try{
+					Thread.sleep(10);
+				}catch(InterruptedException exception) {
+					logger.error("Error while waiting for ");
+				}
+			}
+	}
 }

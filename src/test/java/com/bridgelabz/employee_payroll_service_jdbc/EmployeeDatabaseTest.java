@@ -16,6 +16,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+
 /**
  * Unit test for Employees Payroll Database.
  */
@@ -290,6 +291,27 @@ public class EmployeeDatabaseTest
 		assertEquals(6, listEmployees.size());
     }
     
+    @Test
+    public void addEmployeesNoPayrollInDatabaseThreads() throws JDBCException
+    {
+    	Date date = Date.valueOf("2020-08-01");
+    	Employees employees = new Employees("Garry", 7, 50000, date, "Male", 50000, 10000, 40000, 4000, 46000, 8676754675l);
+    	Employees employees2 = new Employees("Harry", 8, 50000, date, "Male", 50000, 10000, 40000, 4000, 46000, 8698754675l);
+    	listEmployees.clear();
+    	listEmployees.add(employees);
+    	listEmployees.add(employees2);
+    	Instant start = Instant.now();
+    	payDataService.addMultipleEmployeesThreads(connection,listEmployees);
+		Instant end = Instant.now();
+		System.out.println("Execution time : " + Duration.between(start, end));
+		for(Employees employees3 : listEmployees) {
+			payDataService.deleteRecord(connection,employees3.getEmployeeID());
+		}
+		listEmployees = payDataService.getListFromDatabase(connection);
+		assertEquals(6, listEmployees.size());
+    }
+    
+    @After
     public void endMethod() throws JDBCException {
     	try {
     			if(payDataService.getPreparedStatement() != null)
