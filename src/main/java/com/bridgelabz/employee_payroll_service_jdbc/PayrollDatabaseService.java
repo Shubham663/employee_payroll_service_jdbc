@@ -573,12 +573,14 @@ public class PayrollDatabaseService {
 				} catch (JDBCException e1) {
 					logger.error("Error while getting another connection");
 				}	
+				logger.info("Employee being added " + Thread.currentThread().getName());
 				employeeAddStatus.put(employee.hashCode(), false);
 				try {
 					addEmployee(connection2, employee);
 				} catch (JDBCException e) {
 					logger.error("Error when adding employee " + e.getMessage());
 				}
+				logger.info("Employee added " + Thread.currentThread().getName());
 				employeeAddStatus.put(employee.hashCode(), true);
 			};
 			Thread thread = new Thread(task,employee.getName());
