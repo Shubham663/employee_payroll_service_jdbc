@@ -290,7 +290,7 @@ public class PayrollDatabaseService {
 			preparedStatement.setDouble(10, employees.getNetPay());
 			preparedStatement.setLong(11, employees.getPhoneNumber());
 			preparedStatement.execute();
-			preparedStatement.close();
+//			preparedStatement.close();
 		} catch (SQLException exception) {
 			throw new JDBCException("Error while running group statements with prepared Statement " + exception.getMessage());
 		}
