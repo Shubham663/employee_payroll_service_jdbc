@@ -30,7 +30,8 @@ public class PayrollDatabaseService {
 	Logger logger = null;
 	private PreparedStatement preparedStatement;
 	private static PayrollDatabaseService pdService;
-
+	int connectionCounter = 0;
+	
 	/**
 	 * @return the preparedStatement
 	 */
@@ -67,11 +68,12 @@ public class PayrollDatabaseService {
 
 	public Connection connectToDatabase(Connection connection) throws JDBCException {
 		try {
-			logger.info("Connecting to database");
+			connectionCounter++;
+			logger.info("Connecting to database with connection no " + connectionCounter);
 			connection = DriverManager.getConnection(
 					"jdbc:mysql://localhost:3306/employee_payroll_service?useSSL=false", "root",
 					Repos.returnPassword());
-			logger.info("Connection Established " + connection);
+			logger.info("Connection Established " + connection + " for the thread " + Thread.currentThread().getName() + " running with connection no " + connectionCounter);
 		} catch (SQLException e) {
 			throw new JDBCException("Error while connecting to " + connection + e.getMessage());
 		}
@@ -265,10 +267,16 @@ public class PayrollDatabaseService {
 		return avgSalary;
 	}
 
-	public void addEmployee(Connection connection, Employees employees) throws JDBCException {
+	public synchronized void addEmployee(Connection connection, Employees employees) throws JDBCException {
 		List<Employees> listEmployees = null;
+		Connection connection2 = null;
 		try {
-			preparedStatement = connection.prepareStatement("insert into employees values(?,?,?,?,?,?,?,?,?,?,?)");
+			 connection2 = connectToDatabase(connection2);
+		} catch (JDBCException e1) {
+			logger.error("Error while getting another connection");
+		}
+		try {
+			preparedStatement = connection2.prepareStatement("insert into employees values(?,?,?,?,?,?,?,?,?,?,?)");
 			preparedStatement.setInt(1, employees.getEmployeeID());
 			preparedStatement.setString(2, employees.getName());
 			preparedStatement.setDouble(3, employees.getSalary());
@@ -290,6 +298,7 @@ public class PayrollDatabaseService {
 			preparedStatement.setDouble(10, employees.getNetPay());
 			preparedStatement.setLong(11, employees.getPhoneNumber());
 			preparedStatement.execute();
+			connection2.close();
 //			preparedStatement.close();
 		} catch (SQLException exception) {
 			throw new JDBCException("Error while running group statements with prepared Statement " + exception.getMessage());
@@ -567,16 +576,11 @@ public class PayrollDatabaseService {
 		Map<Integer, Boolean> employeeAddStatus = new HashMap<>();
 		listEmployees2.forEach(employee ->{
 			Runnable task = () -> {
-				Connection connection2 = null;
-				try {
-					 connection2 = connectToDatabase(connection);
-				} catch (JDBCException e1) {
-					logger.error("Error while getting another connection");
-				}	
+					
 				logger.info("Employee being added " + Thread.currentThread().getName());
 				employeeAddStatus.put(employee.hashCode(), false);
 				try {
-					addEmployee(connection2, employee);
+					addEmployee(connection, employee);
 				} catch (JDBCException e) {
 					logger.error("Error when adding employee " + e.getMessage());
 				}
@@ -585,13 +589,8 @@ public class PayrollDatabaseService {
 			};
 			Thread thread = new Thread(task,employee.getName());
 			thread.start();
-			try{
-				Thread.sleep(10);
-			}catch(InterruptedException exception) {
-				logger.error("Error while waiting for ");
-			}
 		});
-			while(employeeAddStatus.containsValue(false)) {
+			while(employeeAddStatus.size() < listEmployees2.size() || employeeAddStatus.containsValue(false)) {
 				try{
 					Thread.sleep(10);
 				}catch(InterruptedException exception) {

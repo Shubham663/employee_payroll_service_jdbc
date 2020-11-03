@@ -295,8 +295,8 @@ public class EmployeeDatabaseTest
     public void addEmployeesNoPayrollInDatabaseThreads() throws JDBCException
     {
     	Date date = Date.valueOf("2020-08-01");
-    	Employees employees = new Employees("Garry", 7, 50000, date, "Male", 50000, 10000, 40000, 4000, 46000, 8676754675l);
-    	Employees employees2 = new Employees("Harry", 8, 50000, date, "Male", 50000, 10000, 40000, 4000, 46000, 8698754675l);
+    	Employees employees = new Employees("Garry", 9, 50000, date, "Male", 50000, 10000, 40000, 4000, 46000, 8676754675l);
+    	Employees employees2 = new Employees("Harry", 10, 50000, date, "Male", 50000, 10000, 40000, 4000, 46000, 8698754675l);
     	listEmployees.clear();
     	listEmployees.add(employees);
     	listEmployees.add(employees2);
