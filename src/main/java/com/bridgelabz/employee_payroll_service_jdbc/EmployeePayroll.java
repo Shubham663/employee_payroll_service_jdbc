@@ -2,6 +2,7 @@ package com.bridgelabz.employee_payroll_service_jdbc;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * @author Shubham
@@ -12,7 +13,11 @@ public class EmployeePayroll {
 	private EmployeesNoPayroll employee;
 	private List<Departments> departments;
 	
-
+	@Override
+		public int hashCode() {
+			return Objects.hash(payroll,employee,departments);
+		}
+	
 	public EmployeePayroll() {
 		departments = new ArrayList<>();
 	}

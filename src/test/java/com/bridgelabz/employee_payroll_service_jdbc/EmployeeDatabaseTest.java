@@ -8,6 +8,7 @@ import java.sql.Date;
 import java.sql.SQLException;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.logging.log4j.LogManager;
@@ -309,6 +310,56 @@ public class EmployeeDatabaseTest
 		}
 		listEmployees = payDataService.getListFromDatabase(connection);
 		assertEquals(6, listEmployees.size());
+    }
+    
+    @Test
+    public void addMultipleEmployeePayrollInDatabaseTransactionsThreads() throws JDBCException
+    {
+    	Date date = Date.valueOf("2020-08-01");
+    	Employees employees = new Employees("Garry", 9, 50000, date, "Male", 50000, 10000, 40000, 4000, 46000, 8676754675l);
+    	Employees employees2 = new Employees("Harry", 10, 50000, date, "Male", 50000, 10000, 40000, 4000, 46000, 8698754675l);
+    	
+    	Departments departments = new Departments();
+    	departments.setAddress("Lucknow");
+    	departments.setDepartmentName("HR");
+    	departments.setId(7);
+    	
+    	Departments departments2 = new Departments();
+    	departments2.setAddress("Ludhiana");
+    	departments2.setDepartmentName("HR");
+    	departments2.setId(8);
+    	
+    	EmployeePayroll employeePayroll1 = new EmployeePayroll();
+    	EmployeesNoPayroll employeesNoPayroll1 = new EmployeesNoPayroll(employees.getName(), employees.getEmployeeID(), employees.getStart_date(), employees.getGender(), employees.getPhoneNumber());
+    	Payroll payroll1 = new Payroll(employees.getBasicPay(), employees.getDeductions(), employees.getTaxablePay(), employees.getIncomeTax(), employees.getNetPay());
+    	employeePayroll1.setEmployee(employeesNoPayroll1);
+    	employeePayroll1.setPayroll(payroll1);
+    	employeePayroll1.getDepartments().add(departments);
+    	
+    	EmployeePayroll employeePayroll2 = new EmployeePayroll();
+    	EmployeesNoPayroll employeesNoPayroll2 = new EmployeesNoPayroll(employees2.getName(), employees2.getEmployeeID(), employees2.getStart_date(), employees2.getGender(), employees2.getPhoneNumber());
+    	Payroll payroll2 = new Payroll(employees2.getBasicPay(), employees2.getDeductions(), employees2.getTaxablePay(), employees2.getIncomeTax(), employees2.getNetPay());
+    	employeePayroll2.setEmployee(employeesNoPayroll2);
+    	employeePayroll2.setPayroll(payroll2);
+    	employeePayroll2.getDepartments().add(departments2);
+    	
+    	List<EmployeePayroll> listEmployeePayrolls = new ArrayList<>();
+    	listEmployeePayrolls.add(employeePayroll1);
+    	listEmployeePayrolls.add(employeePayroll2);
+		
+    	List<EmployeesNoPayroll> employeesNoPayrolls = payDataService.getListFromDatabaseEmployeeNoPayroll(connection);
+		int initial = employeesNoPayrolls.size();
+    	
+		payDataService.addMultipleEmployeePayrollWholeThreads(connection,listEmployeePayrolls);
+    	
+		for(EmployeePayroll employeePayroll : listEmployeePayrolls) {
+			EmployeesNoPayroll employees3 = employeePayroll.getEmployee();
+			Departments departments3 = employeePayroll.getDepartments().get(0);
+			payDataService.deleteRecordEmployeePayrollAfterCascade(connection,employees3.getEmployeeID(),departments3.getId());
+		}
+
+		employeesNoPayrolls = payDataService.getListFromDatabaseEmployeeNoPayroll(connection);
+		assertEquals(initial, employeesNoPayrolls.size());
     }
     
     @After
