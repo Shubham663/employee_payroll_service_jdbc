@@ -6,6 +6,8 @@ import static org.junit.Assert.assertTrue;
 import java.sql.Connection;
 import java.sql.Date;
 import java.sql.SQLException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -360,6 +362,32 @@ public class EmployeeDatabaseTest
 
 		employeesNoPayrolls = payDataService.getListFromDatabaseEmployeeNoPayroll(connection);
 		assertEquals(initial, employeesNoPayrolls.size());
+    }
+    
+    @Test
+    public void updateMultipleEmployeePayrollInDatabaseTransactionsThreads() throws JDBCException
+    {
+    	Date date = Date.valueOf("2020-11-01");
+    	List<Integer> list = new ArrayList<>();
+		list.add(1);
+		list.add(2);
+		payDataService.updateMultipleEmployeePayrollThreads(connection,list,date);
+
+		List<EmployeesNoPayroll> employeesNoPayrolls = payDataService.getListFromDatabaseEmployeeNoPayroll(connection);
+		for(EmployeesNoPayroll employeesNoPayroll : employeesNoPayrolls) {
+			if( !list.contains( employeesNoPayroll.getEmployeeID() ) )
+				continue;
+			SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-mm-dd");
+			java.util.Date date2 = null;
+			try {
+				date2 = simpleDateFormat.parse(employeesNoPayroll.getStart_date().toString());
+			} catch (ParseException e) {
+				e.printStackTrace();
+			}
+			String stringDate = simpleDateFormat.format(date2);
+			Date date3 = Date.valueOf(stringDate);
+			assertEquals(date, date3);
+		}
     }
     
     @After
