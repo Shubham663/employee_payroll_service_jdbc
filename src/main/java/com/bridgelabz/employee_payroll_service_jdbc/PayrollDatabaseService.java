@@ -468,30 +468,36 @@ public class PayrollDatabaseService {
 		}
 	}
 
-	public void addEmployeePayrollWhole(Connection connection, EmployeePayroll employeePayroll,Employees employees) throws JDBCException {
-		this.addEmployeePayroll(connection, employees);
+	public synchronized void addEmployeePayrollWhole(Connection connection, EmployeePayroll employeePayroll,Employees employees) throws JDBCException {
+		Connection connection2 = null;
+		try {
+			 connection2 = connectToDatabase(connection2);
+		} catch (JDBCException e1) {
+			logger.error("Error while getting another connection");
+		}
+		this.addEmployeePayroll(connection2, employees);
 		
 		try {
-			connection.setAutoCommit(false);
+			connection2.setAutoCommit(false);
 			for(Departments departments : employeePayroll.getDepartments()) {
-				preparedStatement = connection.prepareStatement("insert into department values(?,?,?)");
+				preparedStatement = connection2.prepareStatement("insert into department values(?,?,?)");
 				preparedStatement.setString(1, departments.getDepartmentName());
 				preparedStatement.setString(2, departments.getAddress());
 				preparedStatement.setInt(3, departments.getId());
 				preparedStatement.execute();
 				logger.info("Successfully added data to table department");
-				preparedStatement = connection.prepareStatement("insert into empid_departmentid values(?,?)");
+				preparedStatement = connection2.prepareStatement("insert into empid_departmentid values(?,?)");
 				preparedStatement.setInt(1, employees.getEmployeeID());
 				preparedStatement.setInt(2, departments.getId());
 				preparedStatement.execute();
 				logger.info("Successfully added data to table empid_departmentid");
-				connection.commit();
+				connection2.commit();
 			}
-			connection.setAutoCommit(true);
+			connection2.setAutoCommit(true);
 //			preparedStatement.close();
 		} catch (SQLException exception) {
 			try {
-				connection.rollback();
+				connection2.rollback();
 			} catch (SQLException e) {
 				throw new JDBCException("Error when trying to perform rollback on connection " + e.getMessage());
 			}
@@ -510,7 +516,7 @@ public class PayrollDatabaseService {
 			logger.info("Successfull deletion from employee_no_payroll, employee_payroll_map, department, empid_departmentid tables");
 //			preparedStatement.close();
 		} catch (SQLException exception) {
-			throw new JDBCException("Error while running group statements with prepared Statement " + exception.getMessage());
+			throw new JDBCException("Error while deleting record " + exception.getMessage());
 		}
 	}
 
@@ -591,6 +597,34 @@ public class PayrollDatabaseService {
 			thread.start();
 		});
 			while(employeeAddStatus.size() < listEmployees2.size() || employeeAddStatus.containsValue(false)) {
+				try{
+					Thread.sleep(10);
+				}catch(InterruptedException exception) {
+					logger.error("Error while waiting for ");
+				}
+			}
+	}
+
+	public void addMultipleEmployeePayrollWholeThreads(Connection connection, List<EmployeePayroll> listEmployeePayrolls) {
+		Map<Integer, Boolean> employeeAddStatus = new HashMap<>();
+		listEmployeePayrolls.forEach(employeePayroll ->{
+			Runnable task = () -> {
+					
+				logger.info("Employee Payroll being added " + Thread.currentThread().getName());
+				employeeAddStatus.put(employeePayroll.hashCode(), false);
+				try {
+					Employees employees = new Employees(employeePayroll.getEmployee().getName(), employeePayroll.getEmployee().getEmployeeID(), employeePayroll.getPayroll().getBasicPay(), employeePayroll.getEmployee().getStart_date(), employeePayroll.getEmployee().getGender(), employeePayroll.getPayroll().getBasicPay(), employeePayroll.getPayroll().getDeductions(), employeePayroll.getPayroll().getTaxablePay(), employeePayroll.getPayroll().getIncomeTax(), employeePayroll.getPayroll().getNetPay(), employeePayroll.getEmployee().getPhoneNumber());
+					addEmployeePayrollWhole(connection, employeePayroll, employees);
+				} catch (JDBCException e) {
+					logger.error("Error when adding employee payroll " + e.getMessage());
+				}
+				logger.info("Employee Payroll added " + Thread.currentThread().getName());
+				employeeAddStatus.put(employeePayroll.hashCode(), true);
+			};
+			Thread thread = new Thread(task,employeePayroll.getEmployee().getName());
+			thread.start();
+		});
+			while(employeeAddStatus.size() < listEmployeePayrolls.size() || employeeAddStatus.containsValue(false)) {
 				try{
 					Thread.sleep(10);
 				}catch(InterruptedException exception) {
