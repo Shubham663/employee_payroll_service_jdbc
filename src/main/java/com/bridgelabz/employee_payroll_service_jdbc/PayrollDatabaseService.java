@@ -632,4 +632,38 @@ public class PayrollDatabaseService {
 				}
 			}
 	}
+
+	public void updateMultipleEmployeePayrollThreads(Connection connection, List<Integer> list, Date date) {
+		Map<Integer, Boolean> employeeAddStatus = new HashMap<>();	
+		list.forEach(id -> {
+			Runnable task = () -> {
+				try {
+					Connection connection2 = null;
+					try {
+						 connection2 = connectToDatabase(connection2);
+					} catch (JDBCException e1) {
+						logger.error("Error while getting another connection");
+					}
+					employeeAddStatus.put(id, false);
+					preparedStatement = connection2.prepareStatement("Update employees_no_payroll set start_date = ? where employee_id = ?");
+					preparedStatement.setDate(1, date);
+					preparedStatement.setInt(2, id);
+					preparedStatement.execute();
+					employeeAddStatus.put(id, true);
+		//			preparedStatement.close();
+				} catch (SQLException exception) {
+					logger.error("Error while updating employee payroll in tables");
+				}
+			};
+			Thread thread = new Thread(task,"thread id: " + id.toString());
+			thread.start();
+		});
+		while(employeeAddStatus.size() < list.size() || employeeAddStatus.containsValue(false)) {
+			try{
+				Thread.sleep(10);
+			}catch(InterruptedException exception) {
+				logger.error("Error while waiting for threads to finish");
+			}
+		}
+	}
 }
