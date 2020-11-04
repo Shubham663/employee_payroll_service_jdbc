@@ -76,6 +76,11 @@ public class PayrollJsonServerService {
 		Response response = RestAssured.get("/employees/list");
 		return response;
 	}
+
+	public Response deleteEmployeeFromJsonServer(int id) {
+		Response response = RestAssured.delete("/employees/delete/"+id);
+		return response;
+	}
 	
 	
 }

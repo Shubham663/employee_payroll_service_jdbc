@@ -6,6 +6,7 @@ import java.sql.Date;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.hamcrest.CoreMatchers;
 import org.hamcrest.Matchers;
 import org.junit.Before;
 import org.junit.Test;
@@ -73,9 +74,20 @@ public class EmployeeJsonServerTest {
 		PayrollJsonServerService paService = PayrollJsonServerService.getInstance();
 		Response response = paService.getEmployeeListFromJsonServer();
 		String responseAsString = response.asString();
-		System.out.println(responseAsString);
 		response.then().body("id", Matchers.hasItems(2,3,5,6));
 		response.then().body("name", Matchers.hasItems("Lisa"));
 		response.then().body("salary",Matchers.hasItem("40000.0"));
+	}
+	
+	@Test
+	public void deleteEmployeeFromJsonServerTest() {
+		PayrollJsonServerService paService = PayrollJsonServerService.getInstance();
+		Response response = paService.deleteEmployeeFromJsonServer(15);
+		String responseAsString = response.asString();
+		System.out.println(responseAsString);
+		int status = response.getStatusCode();
+		assertThat(status, CoreMatchers.is(200));
+		response = paService.getEmployeeListFromJsonServer();
+		response.then().body("id", Matchers.not(15));
 	}
 }
