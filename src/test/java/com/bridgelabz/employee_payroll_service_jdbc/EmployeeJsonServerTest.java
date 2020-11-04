@@ -7,7 +7,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.hamcrest.Matchers;
-import org.hamcrest.core.Is;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -15,7 +14,6 @@ import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 
 import io.restassured.RestAssured;
-import io.restassured.http.ContentType;
 import io.restassured.response.Response;
 
 /**
@@ -56,6 +54,17 @@ public class EmployeeJsonServerTest {
 		list.add(employees2);
 		PayrollJsonServerService paService = PayrollJsonServerService.getInstance();
 		Boolean boolean1 = paService.addMultipleEmployeesToJsonServer(list);
-		assertThat("Employees not added", true, Is.is(true));
+		assertThat("Employees not added", true, Matchers.is(true));
+	}
+	
+	@Test
+	public void updateEmployeeSalaryInJsonServerTest() {
+		PayrollJsonServerService paService = PayrollJsonServerService.getInstance();
+		Response response = paService.updateEmployeeSalaryInJsonServer(40000,5);
+		String responseAsString = response.asString();
+		System.out.println(responseAsString);
+		response.then().body("id", Matchers.any(Integer.class));
+		response.then().body("name", Matchers.is("Lisa"));
+		response.then().body("salary",Matchers.is("40000.0"));
 	}
 }

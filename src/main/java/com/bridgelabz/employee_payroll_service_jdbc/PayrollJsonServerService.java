@@ -61,6 +61,16 @@ public class PayrollJsonServerService {
 		}
 		return true;
 	}
+
+	public Response updateEmployeeSalaryInJsonServer(double salary, int id) {
+		Response response = RestAssured.given()
+				.contentType(ContentType.JSON)
+				.accept(ContentType.JSON)
+				.body("{\"name\": \"Lisa\",\"salary\": \""+ salary + "\"}")
+				.when()
+				.put("/employees/update/"+id);
+		return response;
+	}
 	
 	
 }
