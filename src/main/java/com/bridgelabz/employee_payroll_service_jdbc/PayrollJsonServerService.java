@@ -71,6 +71,11 @@ public class PayrollJsonServerService {
 				.put("/employees/update/"+id);
 		return response;
 	}
+
+	public Response getEmployeeListFromJsonServer() {
+		Response response = RestAssured.get("/employees/list");
+		return response;
+	}
 	
 	
 }
