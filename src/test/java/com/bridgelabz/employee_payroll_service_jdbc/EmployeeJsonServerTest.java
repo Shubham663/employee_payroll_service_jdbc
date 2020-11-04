@@ -67,4 +67,15 @@ public class EmployeeJsonServerTest {
 		response.then().body("name", Matchers.is("Lisa"));
 		response.then().body("salary",Matchers.is("40000.0"));
 	}
+	
+	@Test
+	public void getEmployeeListFromJsonServerTest() {
+		PayrollJsonServerService paService = PayrollJsonServerService.getInstance();
+		Response response = paService.getEmployeeListFromJsonServer();
+		String responseAsString = response.asString();
+		System.out.println(responseAsString);
+		response.then().body("id", Matchers.hasItems(2,3,5,6));
+		response.then().body("name", Matchers.hasItems("Lisa"));
+		response.then().body("salary",Matchers.hasItem("40000.0"));
+	}
 }
