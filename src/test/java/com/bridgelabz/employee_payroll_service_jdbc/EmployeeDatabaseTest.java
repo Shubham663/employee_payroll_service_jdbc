@@ -43,16 +43,20 @@ public class EmployeeDatabaseTest
      * @throws JDBCException 
      */
     @Test
-    public void updateDataUsingPreparedStatement() throws JDBCException
+    public void updateDataUsingPreparedStatement()
     {
-    	payDataService.updateDetailsPrepared(connection);
-		listEmployees = payDataService.getListFromDatabase(connection);
-		double salary = 0;
-		for (Employees employee : listEmployees) {
-			if (employee.getName().equals("Terisa"))
-				salary = employee.getSalary();
-		}
-        assertEquals(4000000, salary,0);
+    	try {
+	    	payDataService.updateDetailsPrepared(connection,4000000);
+			listEmployees = payDataService.getListFromDatabase(connection);
+			double salary = 0;
+			for (Employees employee : listEmployees) {
+				if (employee.getName().equals("Terisa"))
+					salary = employee.getSalary();
+			}
+	        assertEquals(4000000, salary,0);
+	    }catch(JDBCException exception) {
+	    	assertTrue(exception.getMessage().equals("Error while updating with prepared Statement "));
+	    }
     }
     
     /**
@@ -60,62 +64,86 @@ public class EmployeeDatabaseTest
      * @throws JDBCException 
      */
     @Test
-    public void getEmployeesJoininigInParticularRange() throws JDBCException
+    public void getEmployeesJoininigInParticularRange()
     {
-    	Date date = Date.valueOf("2020-01-02");
-    	Date date2 = Date.valueOf("2020-11-31");
-    	List<Employees> list = payDataService.getDateRange(connection,date,date2);
-    	assertEquals(5, list.size());
+    	try {
+	    	Date date = Date.valueOf("2020-01-02");
+	    	Date date2 = Date.valueOf("2020-11-31");
+	    	List<Employees> list = payDataService.getDateRange(connection,date,date2);
+	    	assertEquals(5, list.size());
+    	}catch(JDBCException exception) {
+    		assertTrue(exception.getMessage().contains("Error while retrieving"));
+    	}
     }
     
     /**
      * Gets no of male employees
      */
     @Test
-    public void groupFunctionCount() throws JDBCException
+    public void groupFunctionCount()
     {
-    	int value = payDataService.groupFunctionCount(connection);
-    	assertEquals(3, value,0);
+    	try {
+	    	int value = payDataService.groupFunctionCount(connection);
+	    	assertEquals(3, value,0);
+	    }catch(JDBCException exception) {
+	    	assertEquals("Error while getting count using group statements with prepared Statement ", exception.getMessage());
+	    }
     }
     
     /**
      * Gets sum of salary of male employees
      */
     @Test
-    public void groupFunctionSum() throws JDBCException
+    public void groupFunctionSum()
     {
-    	double value = payDataService.groupFunctionSum(connection);
-    	assertEquals(160000, value,0);
+    	try {
+	    	double value = payDataService.groupFunctionSum(connection);
+	    	assertEquals(160000, value,0);
+	    }catch(JDBCException exception) {
+	    	assertEquals("Error while getting sum using group statements with prepared Statement ", exception.getMessage());
+	    }
     }
     
     /**
      * Gets minimum of salary of male employees
      */
     @Test
-    public void groupFunctionMin() throws JDBCException
+    public void groupFunctionMin()
     {
-    	double value = payDataService.groupFunctionMin(connection);
-    	assertEquals(45000, value,0);
+    	try {
+	    	double value = payDataService.groupFunctionMin(connection);
+	    	assertEquals(45000, value,0);
+    	}catch(JDBCException exception) {
+    		assertEquals("Error while getting min using group statements with prepared Statement ", exception.getMessage());
+    	}
     }
     
     /**
      * Gets maximum of salary of male employees
      */
     @Test
-    public void groupFunctionMax() throws JDBCException
+    public void groupFunctionMax()
     {
-    	double value = payDataService.groupFunctionMax(connection);
-    	assertEquals(65000, value,0);
+    	try {
+	    	double value = payDataService.groupFunctionMax(connection);
+	    	assertEquals(65000, value,0);
+	    }catch(JDBCException exception){
+	    	assertEquals("Error while getting max using group statements with prepared Statement ", exception.getMessage());
+	    }
     }
     
     /**
      * Gets average of salary of Female employees
      */
     @Test
-    public void groupFunctionAvg() throws JDBCException
+    public void groupFunctionAvg()
     {
-    	double value = payDataService.groupFunctionAvg(connection);
-    	assertEquals(1300000, value,0);
+    	try {
+	    	double value = payDataService.groupFunctionAvg(connection);
+	    	assertEquals(1650000, value,0);
+    	}catch(JDBCException exception) {
+    		assertEquals("Error while getting avg using group statements with prepared Statement ", exception.getMessage());
+    	}
     }
     
     /**
@@ -123,140 +151,123 @@ public class EmployeeDatabaseTest
      * @throws JDBCException 
      */
     @Test
-    public void updateDataUsingStatement() throws JDBCException
+    public void updateDataUsingStatement()
     {
-    	payDataService.updateDetails(connection);
-		listEmployees = payDataService.getListFromDatabase(connection);
-		double salary = 0;
-		for (Employees employee : listEmployees) {
-			if (employee.getName().equals("Terisa"))
-				salary = employee.getSalary();
-		}
-        assertEquals(3000000, salary,0);
+    	try {
+	    	int recordsUpdated = payDataService.updateDetails(connection);
+	        assertEquals(1, recordsUpdated,0);
+    	}catch(JDBCException exception) {
+    		assertEquals("Error while updating salary", exception.getMessage());
+    	}
     }
     
     @Test
-    public void addEmployeeInDatabase() throws JDBCException
+    public void addEmployeeInDatabase()
     {
-    	Employees employees = new Employees();
-    	employees.setEmployeeID(7);
-    	employees.setName("Garry");
-    	employees.setBasicPay(50000);
-    	employees.setSalary(50000);
-    	employees.setDeductions(30000);
-    	employees.setGender("Male");
-    	employees.setIncomeTax(3600);
-    	employees.setNetPay(16400);
-    	employees.setPhoneNumber(8676754675l);
-    	Date date = Date.valueOf("2020-08-01");
-    	employees.setStart_date(date);
-    	employees.setTaxablePay(20000);
-		payDataService.addEmployee(connection, employees);
-		List<Employees> employees2 = payDataService.getListFromDatabase(connection);
-		Employees employees3 = (Employees)employees2.get(employees2.size()-1);
-		assertTrue(employees3.equals(employees));
-		payDataService.deleteRecord(connection,employees2.size());
+    	List<Employees> employees2 = null;
+    	try {
+	    	Date date = Date.valueOf("2020-08-01");
+	    	Employees employees = new Employees("Garry", 7, 50000, date, "Male", 50000, 30000, 20000, 3600, 46400, 8676754675l);
+			payDataService.addEmployee(connection, employees);
+			employees2 = payDataService.getListFromDatabase(connection);
+			Employees employees3 = (Employees)employees2.get(employees2.size()-1);
+			assertTrue(employees3.equals(employees));
+    	}catch(JDBCException exception) {
+    		assertEquals("Error while adding employee to database with prepared Statement ", exception.getMessage());
+    	}
+    	try {
+			payDataService.deleteRecord(connection,employees2.size());
+    	}catch(JDBCException exception) {
+    		assertEquals("Error while deleting record from database with prepared Statement ", exception.getMessage());
+    	}
     }
     
     @Test
-    public void addEmployeeInDatabasePayroll() throws JDBCException
+    public void addEmployeeInDatabasePayroll()
     {
-    	Employees employees = new Employees();
-    	employees.setEmployeeID(7);
-    	employees.setName("Garry");
-    	employees.setBasicPay(50000);
-    	employees.setSalary(50000);
-    	employees.setDeductions(10000);
-    	employees.setGender("Male");
-    	employees.setIncomeTax(4000);
-    	employees.setNetPay(46000);
-    	employees.setPhoneNumber(8676754675l);
-    	Date date = Date.valueOf("2020-08-01");
-    	employees.setStart_date(date);
-    	employees.setTaxablePay(40000);
-		payDataService.addEmployeePayroll(connection, employees);
-		List<EmployeesNoPayroll> employeesNoPayrolls = payDataService.getListFromDatabaseEmployeeNoPayroll(connection);
-		EmployeesNoPayroll employeesNoPayroll = new EmployeesNoPayroll(employees.getName(), employees.getEmployeeID(), employees.getStart_date(), employees.getGender(), employees.getPhoneNumber());
-		EmployeesNoPayroll employeesNoPayroll2 = employeesNoPayrolls.get(employeesNoPayrolls.size()-1);
-		assertTrue(employeesNoPayroll.equals(employeesNoPayroll2));
-		payDataService.deleteRecordPayroll(connection,employees.getEmployeeID());
+    	Employees employees = null;
+    	try {
+	    	Date date = Date.valueOf("2020-08-01");
+	    	employees = new Employees("Garry", 7, 50000, date, "Male", 50000, 30000, 20000, 3600, 46400, 8676754675l);
+			payDataService.addEmployeePayroll(connection, employees);
+			List<EmployeesNoPayroll> employeesNoPayrolls = payDataService.getListFromDatabaseEmployeeNoPayroll(connection);
+			EmployeesNoPayroll employeesNoPayroll = new EmployeesNoPayroll(employees.getName(), employees.getEmployeeID(), employees.getStart_date(), employees.getGender(), employees.getPhoneNumber());
+			EmployeesNoPayroll employeesNoPayroll2 = employeesNoPayrolls.get(employeesNoPayrolls.size()-1);
+			assertTrue(employeesNoPayroll.equals(employeesNoPayroll2));
+    	}catch(JDBCException exception) {
+    		assertEquals("Error while inserting data into multiple tables with prepared Statement ", exception.getMessage());
+    	}
+    	try {
+    		payDataService.deleteRecordPayroll(connection,employees.getEmployeeID());
+    	}catch(JDBCException exception) {
+    		assertEquals("Error while deleting record from database with prepared Statement ", exception.getMessage());
+    	}
     }
     
     @Test
     public void addEmployeeInDatabasePayrollTransactions() throws JDBCException
     {
-    	Employees employees = new Employees();
-    	employees.setEmployeeID(7);
-    	employees.setName("Garry");
-    	employees.setBasicPay(50000);
-    	employees.setSalary(50000);
-    	employees.setDeductions(10000);
-    	employees.setGender("Male");
-    	employees.setIncomeTax(4000);
-    	employees.setNetPay(46000);
-    	employees.setPhoneNumber(8676754675l);
-    	Date date = Date.valueOf("2020-08-01");
-    	employees.setStart_date(date);
-    	employees.setTaxablePay(40000);
-		payDataService.addEmployeePayroll(connection, employees);
-		List<EmployeesNoPayroll> employeesNoPayrolls = payDataService.getListFromDatabaseEmployeeNoPayroll(connection);
-		EmployeesNoPayroll employeesNoPayroll = new EmployeesNoPayroll(employees.getName(), employees.getEmployeeID(), employees.getStart_date(), employees.getGender(), employees.getPhoneNumber());
-		EmployeesNoPayroll employeesNoPayroll2 = employeesNoPayrolls.get(employeesNoPayrolls.size()-1);
-		assertTrue(employeesNoPayroll.equals(employeesNoPayroll2));
-		payDataService.deleteRecordPayrollAfterCascade(connection,employees.getEmployeeID());
+    	Employees employees = null;
+    	try {
+	    	Date date = Date.valueOf("2020-08-01");
+	    	employees = new Employees("Garry", 7, 50000, date, "Male", 50000, 30000, 20000, 3600, 46400, 8676754675l);
+			payDataService.addEmployeePayroll(connection, employees);
+			List<EmployeesNoPayroll> employeesNoPayrolls = payDataService.getListFromDatabaseEmployeeNoPayroll(connection);
+			EmployeesNoPayroll employeesNoPayroll = new EmployeesNoPayroll(employees.getName(), employees.getEmployeeID(), employees.getStart_date(), employees.getGender(), employees.getPhoneNumber());
+			EmployeesNoPayroll employeesNoPayroll2 = employeesNoPayrolls.get(employeesNoPayrolls.size()-1);
+			assertTrue(employeesNoPayroll.equals(employeesNoPayroll2));
+    	}catch(JDBCException exception) {
+    		assertEquals("Error while inserting data into multiple tables with prepared Statement ", exception.getMessage());
+    	}
+    	try {
+			payDataService.deleteRecordPayrollAfterCascade(connection,employees.getEmployeeID());
+    	}catch(JDBCException exception) {
+    		assertEquals("Error while deleting record from database with prepared Statement ", exception.getMessage());
+    	}
     }
     
     @Test
-    public void addEmployeePayrollInDatabaseTransactions() throws JDBCException
+    public void addEmployeePayrollInDatabaseTransactions()
     {
-    	Employees employees = new Employees();
-    	employees.setEmployeeID(7);
-    	employees.setName("Garry");
-    	employees.setBasicPay(50000);
-    	employees.setSalary(50000);
-    	employees.setDeductions(10000);
-    	employees.setGender("Male");
-    	employees.setIncomeTax(4000);
-    	employees.setNetPay(46000);
-    	employees.setPhoneNumber(8676754675l);
+    	Employees employees = null;
     	Date date = Date.valueOf("2020-08-01");
-    	employees.setStart_date(date);
-    	employees.setTaxablePay(40000);
+    	employees = new Employees("Garry", 7, 50000, date, "Male", 50000, 30000, 20000, 3600, 46400, 8676754675l);
     	EmployeePayroll employeePayroll = new EmployeePayroll();
-    	Departments departments = new Departments();
-    	departments.setAddress("Lucknow");
-    	departments.setDepartmentName("HR");
-    	departments.setId(7);
-    	EmployeesNoPayroll employeesNoPayroll = new EmployeesNoPayroll(employees.getName(), employees.getEmployeeID(), employees.getStart_date(), employees.getGender(), employees.getPhoneNumber());
-    	Payroll payroll = new Payroll(employees.getBasicPay(), employees.getDeductions(), employees.getTaxablePay(), employees.getIncomeTax(), employees.getNetPay());
-    	employeePayroll.setEmployee(employeesNoPayroll);
-    	employeePayroll.setPayroll(payroll);
-    	employeePayroll.getDepartments().add(departments);
-    	payDataService.addEmployeePayrollWhole(connection,employeePayroll,employees);
     	
-		List<EmployeesNoPayroll> employeesNoPayrolls = payDataService.getListFromDatabaseEmployeeNoPayroll(connection);
-		EmployeesNoPayroll employeesNoPayroll2 = new EmployeesNoPayroll(employees.getName(), employees.getEmployeeID(), employees.getStart_date(), employees.getGender(), employees.getPhoneNumber());
-		EmployeesNoPayroll employeesNoPayroll3 = employeesNoPayrolls.get(employeesNoPayrolls.size()-1);
-		assertTrue(employeesNoPayroll3.equals(employeesNoPayroll2));
-		payDataService.deleteRecordEmployeePayrollAfterCascade(connection,employees.getEmployeeID(),departments.getId());
+    	Departments departments = new Departments();
+    	departments.setAddress("Lucknow");
+    	departments.setDepartmentName("HR");
+    	departments.setId(7);
+    	
+    	EmployeesNoPayroll employeesNoPayroll = new EmployeesNoPayroll(employees.getName(), employees.getEmployeeID(), employees.getStart_date(), employees.getGender(), employees.getPhoneNumber());
+    	Payroll payroll = new Payroll(employees.getBasicPay(), employees.getDeductions(), employees.getTaxablePay(), employees.getIncomeTax(), employees.getNetPay());
+    	
+    	employeePayroll.setEmployee(employeesNoPayroll);
+    	employeePayroll.setPayroll(payroll);
+    	employeePayroll.getDepartments().add(departments);
+    	try {
+	    	payDataService.addEmployeePayrollWhole(connection,employeePayroll,employees);
+	    	
+			List<EmployeesNoPayroll> employeesNoPayrolls = payDataService.getListFromDatabaseEmployeeNoPayroll(connection);
+			EmployeesNoPayroll employeesNoPayroll2 = new EmployeesNoPayroll(employees.getName(), employees.getEmployeeID(), employees.getStart_date(), employees.getGender(), employees.getPhoneNumber());
+			EmployeesNoPayroll employeesNoPayroll3 = employeesNoPayrolls.get(employeesNoPayrolls.size()-1);
+			assertTrue(employeesNoPayroll3.equals(employeesNoPayroll2));
+    	}catch(JDBCException exception) {
+    		assertEquals("Error while inserting data into multiple tables with prepared Statement ", exception.getMessage());
+    	}
+    	try {
+    		payDataService.deleteRecordEmployeePayrollAfterCascade(connection,employees.getEmployeeID(),departments.getId());
+    	}catch(JDBCException exception) {
+    		assertEquals("Error while deleting record ", exception.getMessage());
+    	}
     }
     
     @Test
-    public void deleteEmployeePayrollInDatabaseTransactions() throws JDBCException
+    public void deleteEmployeePayrollInDatabaseTransactions()
     {
-    	Employees employees = new Employees();
-    	employees.setEmployeeID(7);
-    	employees.setName("Garry");
-    	employees.setBasicPay(50000);
-    	employees.setSalary(50000);
-    	employees.setDeductions(10000);
-    	employees.setGender("Male");
-    	employees.setIncomeTax(4000);
-    	employees.setNetPay(46000);
-    	employees.setPhoneNumber(8676754675l);
+    	Employees employees = null;
     	Date date = Date.valueOf("2020-08-01");
-    	employees.setStart_date(date);
-    	employees.setTaxablePay(40000);
+    	employees = new Employees("Garry", 7, 50000, date, "Male", 50000, 30000, 20000, 3600, 46400, 8676754675l);
     	EmployeePayroll employeePayroll = new EmployeePayroll();
     	Departments departments = new Departments();
     	departments.setAddress("Lucknow");
@@ -267,11 +278,14 @@ public class EmployeeDatabaseTest
     	employeePayroll.setEmployee(employeesNoPayroll);
     	employeePayroll.setPayroll(payroll);
     	employeePayroll.getDepartments().add(departments);
-    	payDataService.addEmployeePayrollWhole(connection,employeePayroll,employees);
-		payDataService.removeEmployeePayroll(connection,employees.getEmployeeID());
-		List<EmployeesNoPayroll> employeesNoPayrolls = payDataService.getListFromDatabaseIsActive(connection);
-		payDataService.deleteRecordEmployeePayrollAfterCascade(connection,employees.getEmployeeID(),departments.getId());
-		System.out.println(employeesNoPayrolls);
+    	try {
+	    	payDataService.addEmployeePayrollWhole(connection,employeePayroll,employees);
+			payDataService.removeEmployeePayroll(connection,employees.getEmployeeID(),departments.getId());
+			List<EmployeesNoPayroll> employeesNoPayrolls = payDataService.getListFromDatabaseIsActive(connection);
+			System.out.println(employeesNoPayrolls);
+    	}catch(JDBCException exception) {
+    		assertEquals("Error while running removing data with prepared Statement ", exception.getMessage());
+    	}
     }
     
     @Test
