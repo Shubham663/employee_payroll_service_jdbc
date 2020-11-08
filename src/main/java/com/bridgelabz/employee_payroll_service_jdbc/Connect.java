@@ -26,7 +26,7 @@ public class Connect {
 			}
 			if (salary == 3000000)
 				logger.info("Local list updated successfully " + salary);
-			payDataService.updateDetailsPrepared(connection);
+			payDataService.updateDetailsPrepared(connection,4000000);
 			list = payDataService.getListFromDatabase(connection);
 			salary = 0;
 			for (Employees employee : list) {
