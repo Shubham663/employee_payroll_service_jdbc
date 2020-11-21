@@ -1,0 +1,53 @@
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width,initial-scale=1.0">
+        <title>Test Ajax Services and Promise</title>
+    <style>
+        .body{
+            margin: auto;
+        }
+        div{
+            border: 1px solid black;
+            background-color: lightblue;
+            padding: 50px;
+            width: 80%;
+            font-size: xx-large;
+            margin-top: 50px;
+        }
+    </style>
+    <script src="./http_services.js"></script>
+    </head>
+    <body>
+        <h1>The Test Services Result</h1>
+        <div id="get_services"></div>
+        <div id="delete_services"></div>
+        <div id="post_services"></div>
+        <script>
+            const getElem = document.getElementById('get_services');
+            const getURL = "http://localhost:3000/employees/list";
+            makePromiseCall("GET",getURL).then(responseText => {
+                getElem.textContent = "The user details as got from get call: " + responseText;
+            }).catch(error => {
+                getElem.textContent = "GET Error Staus: " + JSON.stringify(error);
+            });
+
+            const postElem = document.getElementById('post_services');
+            const postURL = "http://localhost:3000/employees/";
+            const empData = {"name": "Harry","salary":"5000","id":4};
+            makePromiseCall("POST",postURL,false,empData).then(responseText => {
+                postElem.textContent = "The user details posted through post call: " + responseText;
+            }).catch(error => {
+                postElem.textContent = "POST Error Staus: " + JSON.stringify(error);
+            });
+
+            const deleteElem = document.getElementById('delete_services');
+            const deleteURL = "http://localhost:3000/employees/4"
+            makePromiseCall("DELETE",deleteURL,true).then(responseText => {
+                deleteElem.textContent = "The user details deleted through delete call: " + responseText;
+            }).catch(error => {
+                deleteElem.textContent = "DELETE Error Staus: " + JSON.stringify(error);
+            });
+        </script>
+    </body>
+</html>
